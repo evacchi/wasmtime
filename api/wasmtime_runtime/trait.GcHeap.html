@@ -1,0 +1,198 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="A heap that manages garbage-collected objects."><title>GcHeap in wasmtime_runtime - Rust</title><script> if (window.location.protocol !== "file:") document.write(`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2">`)</script><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-e935ef01ae1c1829.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="wasmtime_runtime" data-themes="" data-resource-suffix="" data-rustdoc-version="1.79.0-nightly (1388d7a06 2024-03-20)" data-channel="nightly" data-search-js="search-42d8da7a6b9792c2.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../static.files/storage-4c98445ec4002617.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-12cf3b4f4f9dc36d.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../wasmtime_runtime/index.html">wasmtime_runtime</a><span class="version">21.0.0</span></h2></div><h2 class="location"><a href="#">GcHeap</a></h2><div class="sidebar-elems"><section><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.alloc_externref">alloc_externref</a></li><li><a href="#tymethod.as_any">as_any</a></li><li><a href="#tymethod.as_any_mut">as_any_mut</a></li><li><a href="#tymethod.clone_gc_ref">clone_gc_ref</a></li><li><a href="#tymethod.enter_no_gc_scope">enter_no_gc_scope</a></li><li><a href="#tymethod.exit_no_gc_scope">exit_no_gc_scope</a></li><li><a href="#tymethod.expose_gc_ref_to_wasm">expose_gc_ref_to_wasm</a></li><li><a href="#tymethod.externref_host_data">externref_host_data</a></li><li><a href="#tymethod.gc">gc</a></li><li><a href="#tymethod.header">header</a></li><li><a href="#tymethod.need_gc_before_entering_wasm">need_gc_before_entering_wasm</a></li><li><a href="#tymethod.reset">reset</a></li><li><a href="#tymethod.vmctx_gc_heap_base">vmctx_gc_heap_base</a></li><li><a href="#tymethod.vmctx_gc_heap_bound">vmctx_gc_heap_bound</a></li><li><a href="#tymethod.vmctx_gc_heap_data">vmctx_gc_heap_data</a></li><li><a href="#tymethod.write_gc_ref">write_gc_ref</a></li></ul><h3><a href="#provided-methods">Provided Methods</a></h3><ul class="block"><li><a href="#method.drop_gc_ref">drop_gc_ref</a></li></ul><h3><a href="#implementors">Implementors</a></h3></section><h2><a href="index.html">In crate wasmtime_runtime</a></h2></div></nav><div class="sidebar-resizer"></div>
+    <main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../wasmtime_runtime/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Trait <a href="index.html">wasmtime_runtime</a>::<wbr><a class="trait" href="#">GcHeap</a><button id="copy-path" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="src" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#76-283">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><pre class="rust item-decl"><code>pub unsafe trait GcHeap: 'static + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> {
+<details class="toggle type-contents-toggle"><summary class="hideme"><span>Show 17 methods</span></summary>    // Required methods
+    fn <a href="#tymethod.as_any" class="fn">as_any</a>(&amp;self) -&gt; &amp;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/any/trait.Any.html" title="trait core::any::Any">Any</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.as_any_mut" class="fn">as_any_mut</a>(&amp;mut self) -&gt; &amp;mut dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/any/trait.Any.html" title="trait core::any::Any">Any</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.enter_no_gc_scope" class="fn">enter_no_gc_scope</a>(&amp;mut self);
+<span class="item-spacer"></span>    fn <a href="#tymethod.exit_no_gc_scope" class="fn">exit_no_gc_scope</a>(&amp;mut self);
+<span class="item-spacer"></span>    fn <a href="#tymethod.header" class="fn">header</a>(&amp;self, gc_ref: &amp;<a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>) -&gt; &amp;<a class="struct" href="struct.VMGcHeader.html" title="struct wasmtime_runtime::VMGcHeader">VMGcHeader</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.clone_gc_ref" class="fn">clone_gc_ref</a>(&amp;mut self, gc_ref: &amp;<a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>) -&gt; <a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.write_gc_ref" class="fn">write_gc_ref</a>(
+        &amp;mut self,
+        host_data_table: &amp;mut <a class="struct" href="struct.ExternRefHostDataTable.html" title="struct wasmtime_runtime::ExternRefHostDataTable">ExternRefHostDataTable</a>,
+        destination: &amp;mut <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>&gt;,
+        source: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>&gt;
+    );
+<span class="item-spacer"></span>    fn <a href="#tymethod.expose_gc_ref_to_wasm" class="fn">expose_gc_ref_to_wasm</a>(&amp;mut self, gc_ref: <a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.need_gc_before_entering_wasm" class="fn">need_gc_before_entering_wasm</a>(&amp;self, num_gc_refs: <a class="type" href="https://doc.rust-lang.org/nightly/core/num/nonzero/type.NonZeroUsize.html" title="type core::num::nonzero::NonZeroUsize">NonZeroUsize</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.alloc_externref" class="fn">alloc_externref</a>(
+        &amp;mut self,
+        host_data: <a class="struct" href="struct.ExternRefHostDataId.html" title="struct wasmtime_runtime::ExternRefHostDataId">ExternRefHostDataId</a>
+    ) -&gt; <a class="type" href="https://docs.rs/anyhow/1.0.75/anyhow/type.Result.html" title="type anyhow::Result">Result</a>&lt;<a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.VMExternRef.html" title="struct wasmtime_runtime::VMExternRef">VMExternRef</a>&gt;&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.externref_host_data" class="fn">externref_host_data</a>(
+        &amp;self,
+        externref: &amp;<a class="struct" href="struct.VMExternRef.html" title="struct wasmtime_runtime::VMExternRef">VMExternRef</a>
+    ) -&gt; <a class="struct" href="struct.ExternRefHostDataId.html" title="struct wasmtime_runtime::ExternRefHostDataId">ExternRefHostDataId</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.gc" class="fn">gc</a>&lt;'a&gt;(
+        &amp;'a mut self,
+        roots: <a class="struct" href="struct.GcRootsIter.html" title="struct wasmtime_runtime::GcRootsIter">GcRootsIter</a>&lt;'a&gt;,
+        host_data_table: &amp;'a mut <a class="struct" href="struct.ExternRefHostDataTable.html" title="struct wasmtime_runtime::ExternRefHostDataTable">ExternRefHostDataTable</a>
+    ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="trait.GarbageCollection.html" title="trait wasmtime_runtime::GarbageCollection">GarbageCollection</a>&lt;'a&gt; + 'a&gt;;
+<span class="item-spacer"></span>    unsafe fn <a href="#tymethod.vmctx_gc_heap_base" class="fn">vmctx_gc_heap_base</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>;
+<span class="item-spacer"></span>    unsafe fn <a href="#tymethod.vmctx_gc_heap_bound" class="fn">vmctx_gc_heap_bound</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>;
+<span class="item-spacer"></span>    unsafe fn <a href="#tymethod.vmctx_gc_heap_data" class="fn">vmctx_gc_heap_data</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.reset" class="fn">reset</a>(&amp;mut self);
+
+    // Provided method
+    fn <a href="#method.drop_gc_ref" class="fn">drop_gc_ref</a>(
+        &amp;mut self,
+        host_data_table: &amp;mut <a class="struct" href="struct.ExternRefHostDataTable.html" title="struct wasmtime_runtime::ExternRefHostDataTable">ExternRefHostDataTable</a>,
+        gc_ref: <a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>
+    ) { ... }
+</details>}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A heap that manages garbage-collected objects.</p>
+<p>Each <code>wasmtime::Store</code> is associated with a single <code>GcHeap</code>, and a <code>GcHeap</code>
+is only ever used with one store at a time, but <code>GcHeap</code>s may be reused with
+new stores after its original store is dropped. The <code>reset</code> method will be
+called in between each such reuse. (This reuse allows for better integration
+with the pooling allocator).</p>
+<p>If a <code>GcHeap</code> mapped any memory, its <code>Drop</code> implementation should unmap that
+memory.</p>
+<h2 id="safety"><a class="doc-anchor" href="#safety">§</a>Safety</h2>
+<p>The trait methods below are all safe: implementations of this trait must
+ensure that these methods cannot be misused to create memory unsafety. The
+expectation is that – given that <code>VMGcRef</code> is a newtype over an index –
+implementations perform similar tricks as Wasm linear memory
+implementations. The heap should internally be a contiguous region of memory
+and <code>VMGcRef</code> indices into the heap must be bounds checked (explicitly or
+implicitly via virtual memory tricks).</p>
+<p>Furthermore, if heap corruption occurs because (for example) a <code>VMGcRef</code>
+from a different heap is used with this heap, then that corruption must be
+limited to within this heap. Every heap is a mini sandbox. It follows that
+native pointers should never be written into or read out from the GC heap,
+since that could spread corruption from inside the GC heap out to the native
+host heap. The host data for an <code>externref</code>, therefore, is stored in a side
+table (<code>ExternRefHostDataTable</code>) and never inside the heap. Only an id
+referencing a slot in that table should ever be written into the GC heap.</p>
+<p>These constraints give us great amounts of safety compared to working with
+raw pointers. The worst that could happen is corruption local to heap and a
+panic, or perhaps reading stale heap data from a previous Wasm instance. A
+corrupt <code>GcHeap</code> can <em>never</em> result in the native host’s corruption.</p>
+<p>The downside is that we are introducing <code>heap_base + index</code> computations and
+bounds checking to access GC memory, adding performance overhead. This is
+deemed to be a worthy trade off. Furthermore, it isn’t even a clear cut
+performance degradation since this allows us to use 32-bit “pointers”,
+giving us more compact data representations and the improved cache
+utilization that implies.</p>
+</div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.as_any" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#81">source</a><h4 class="code-header">fn <a href="#tymethod.as_any" class="fn">as_any</a>(&amp;self) -&gt; &amp;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/any/trait.Any.html" title="trait core::any::Any">Any</a></h4></section></summary><div class="docblock"><p>Get this heap as an <code>&amp;Any</code>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.as_any_mut" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#84">source</a><h4 class="code-header">fn <a href="#tymethod.as_any_mut" class="fn">as_any_mut</a>(&amp;mut self) -&gt; &amp;mut dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/any/trait.Any.html" title="trait core::any::Any">Any</a></h4></section></summary><div class="docblock"><p>Get this heap as an <code>&amp;mut Any</code>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.enter_no_gc_scope" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#95">source</a><h4 class="code-header">fn <a href="#tymethod.enter_no_gc_scope" class="fn">enter_no_gc_scope</a>(&amp;mut self)</h4></section></summary><div class="docblock"><p>Enter a no-GC scope.</p>
+<p>Calling the <code>gc</code> method when we are inside a no-GC scope should panic.</p>
+<p>We can enter multiple, nested no-GC scopes and this method should
+account for that.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.exit_no_gc_scope" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#100">source</a><h4 class="code-header">fn <a href="#tymethod.exit_no_gc_scope" class="fn">exit_no_gc_scope</a>(&amp;mut self)</h4></section></summary><div class="docblock"><p>Exit a no-GC scope.</p>
+<p>Dual to <code>enter_no_gc_scope</code>.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.header" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#107">source</a><h4 class="code-header">fn <a href="#tymethod.header" class="fn">header</a>(&amp;self, gc_ref: &amp;<a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>) -&gt; &amp;<a class="struct" href="struct.VMGcHeader.html" title="struct wasmtime_runtime::VMGcHeader">VMGcHeader</a></h4></section></summary><div class="docblock"><p>Get a shared borrow of the <code>VMGcHeader</code> that this GC reference is
+pointing to.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.clone_gc_ref" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#117">source</a><h4 class="code-header">fn <a href="#tymethod.clone_gc_ref" class="fn">clone_gc_ref</a>(&amp;mut self, gc_ref: &amp;<a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>) -&gt; <a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a></h4></section></summary><div class="docblock"><p>Read barrier called every time the runtime clones a GC reference.</p>
+<p>Callers should pass a valid <code>VMGcRef</code> that belongs to the given
+heap. Failure to do so is memory safe, but may result in general
+failures such as panics or incorrect results.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.write_gc_ref" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#148-153">source</a><h4 class="code-header">fn <a href="#tymethod.write_gc_ref" class="fn">write_gc_ref</a>(
+    &amp;mut self,
+    host_data_table: &amp;mut <a class="struct" href="struct.ExternRefHostDataTable.html" title="struct wasmtime_runtime::ExternRefHostDataTable">ExternRefHostDataTable</a>,
+    destination: &amp;mut <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>&gt;,
+    source: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;&amp;<a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>&gt;
+)</h4></section></summary><div class="docblock"><p>Write barrier called every time the runtime overwrites a GC reference.</p>
+<p>The <code>source</code> is a borrowed GC reference, and should not have been cloned
+already for this write operation. This allows implementations to fuse
+the <code>source</code>’s read barrier into this write barrier.</p>
+<p>If an <code>externref</code> is reclaimed, then its associated entry in the
+<code>host_data_table</code> should be removed.</p>
+<p>Callers should pass a valid <code>VMGcRef</code> that belongs to the given heap for
+both the <code>source</code> and <code>destination</code>. Failure to do so is memory safe,
+but may result in general failures such as panics or incorrect results.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.expose_gc_ref_to_wasm" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#162">source</a><h4 class="code-header">fn <a href="#tymethod.expose_gc_ref_to_wasm" class="fn">expose_gc_ref_to_wasm</a>(&amp;mut self, gc_ref: <a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>)</h4></section></summary><div class="docblock"><p>Read barrier called whenever a GC reference is passed from the runtime
+to Wasm: an argument to a host-to-Wasm call, or a return from a
+Wasm-to-host call.</p>
+<p>Callers should pass a valid <code>VMGcRef</code> that belongs to the given
+heap. Failure to do so is memory safe, but may result in general
+failures such as panics or incorrect results.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.need_gc_before_entering_wasm" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#169">source</a><h4 class="code-header">fn <a href="#tymethod.need_gc_before_entering_wasm" class="fn">need_gc_before_entering_wasm</a>(&amp;self, num_gc_refs: <a class="type" href="https://doc.rust-lang.org/nightly/core/num/nonzero/type.NonZeroUsize.html" title="type core::num::nonzero::NonZeroUsize">NonZeroUsize</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Predicate invoked before calling into or returning to Wasm to determine
+whether we should GC first.</p>
+<p><code>num_gc_refs</code> is the number of non-<code>i31ref</code> GC references that will be
+passed into Wasm.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.alloc_externref" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#191">source</a><h4 class="code-header">fn <a href="#tymethod.alloc_externref" class="fn">alloc_externref</a>(
+    &amp;mut self,
+    host_data: <a class="struct" href="struct.ExternRefHostDataId.html" title="struct wasmtime_runtime::ExternRefHostDataId">ExternRefHostDataId</a>
+) -&gt; <a class="type" href="https://docs.rs/anyhow/1.0.75/anyhow/type.Result.html" title="type anyhow::Result">Result</a>&lt;<a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="struct.VMExternRef.html" title="struct wasmtime_runtime::VMExternRef">VMExternRef</a>&gt;&gt;</h4></section></summary><div class="docblock"><p>Allocate a <code>VMExternRef</code> with space for host data described by the given
+layout.</p>
+<p>Return values:</p>
+<ul>
+<li>
+<p><code>Ok(Some(_))</code>: The allocation was successful.</p>
+</li>
+<li>
+<p><code>Ok(None)</code>: There is currently no available space for this
+allocation. The caller should call <code>self.gc()</code>, run the GC to
+completion so the collector can reclaim space, and then try allocating
+again.</p>
+</li>
+<li>
+<p><code>Err(_)</code>: The collector cannot satisfy this allocation request, and
+would not be able to even after the caller were to trigger a
+collection. This could be because, for example, the requested
+allocation is larger than this collector’s implementation limit for
+object size.</p>
+</li>
+</ul>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.externref_host_data" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#198">source</a><h4 class="code-header">fn <a href="#tymethod.externref_host_data" class="fn">externref_host_data</a>(&amp;self, externref: &amp;<a class="struct" href="struct.VMExternRef.html" title="struct wasmtime_runtime::VMExternRef">VMExternRef</a>) -&gt; <a class="struct" href="struct.ExternRefHostDataId.html" title="struct wasmtime_runtime::ExternRefHostDataId">ExternRefHostDataId</a></h4></section></summary><div class="docblock"><p>Get the host data ID associated with the given <code>externref</code>.</p>
+<p>Callers should pass a valid <code>externref</code> that belongs to the given
+heap. Failure to do so is memory safe, but may result in general
+failures such as panics or incorrect results.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.gc" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#217-221">source</a><h4 class="code-header">fn <a href="#tymethod.gc" class="fn">gc</a>&lt;'a&gt;(
+    &amp;'a mut self,
+    roots: <a class="struct" href="struct.GcRootsIter.html" title="struct wasmtime_runtime::GcRootsIter">GcRootsIter</a>&lt;'a&gt;,
+    host_data_table: &amp;'a mut <a class="struct" href="struct.ExternRefHostDataTable.html" title="struct wasmtime_runtime::ExternRefHostDataTable">ExternRefHostDataTable</a>
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="trait.GarbageCollection.html" title="trait wasmtime_runtime::GarbageCollection">GarbageCollection</a>&lt;'a&gt; + 'a&gt;</h4></section></summary><div class="docblock"><p>Start a new garbage collection process.</p>
+<p>The given <code>roots</code> are GC roots and should not be collected (nor anything
+transitively reachable from them).</p>
+<p>Upon reclaiming an <code>externref</code>, its associated entry in the
+<code>host_data_table</code> is removed.</p>
+<p>Callers should pass valid GC roots that belongs to this heap, and the
+host data table associated with this heap’s <code>externref</code>s. Failure to do
+so is memory safe, but may result in general failures such as panics or
+incorrect results.</p>
+<p>This method should panic if we are in a no-GC scope.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.vmctx_gc_heap_base" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#238">source</a><h4 class="code-header">unsafe fn <a href="#tymethod.vmctx_gc_heap_base" class="fn">vmctx_gc_heap_base</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a></h4></section></summary><div class="docblock"><p>Get the GC heap’s base pointer.</p>
+<h5 id="safety-1"><a class="doc-anchor" href="#safety-1">§</a>Safety</h5>
+<p>The memory region</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="self">self</span>.vmctx_gc_heap_base..<span class="self">self</span>.vmctx_gc_heap_base + <span class="self">self</span>.vmctx_gc_heap_bound</code></pre></div>
+<p>must be the GC heap region, and must remain valid for JIT code as long
+as <code>self</code> is not dropped.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.vmctx_gc_heap_bound" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#252">source</a><h4 class="code-header">unsafe fn <a href="#tymethod.vmctx_gc_heap_bound" class="fn">vmctx_gc_heap_bound</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>Get the GC heap’s bound.</p>
+<h5 id="safety-2"><a class="doc-anchor" href="#safety-2">§</a>Safety</h5>
+<p>The memory region</p>
+
+<div class="example-wrap ignore"><a href="#" class="tooltip" title="This example is not tested">ⓘ</a><pre class="rust rust-example-rendered"><code><span class="self">self</span>.vmctx_gc_heap_base..<span class="self">self</span>.vmctx_gc_heap_base + <span class="self">self</span>.vmctx_gc_heap_bound</code></pre></div>
+<p>must be the GC heap region, and must remain valid for JIT code as long
+as <code>self</code> is not dropped.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.vmctx_gc_heap_data" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#262">source</a><h4 class="code-header">unsafe fn <a href="#tymethod.vmctx_gc_heap_data" class="fn">vmctx_gc_heap_data</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a></h4></section></summary><div class="docblock"><p>Get the pointer that will be stored in the <code>VMContext::gc_heap_data</code>
+field and be accessible from JIT code via collaboration with the
+corresponding <code>GcCompiler</code> trait.</p>
+<h5 id="safety-3"><a class="doc-anchor" href="#safety-3">§</a>Safety</h5>
+<p>The returned pointer, if any, must remain valid as long as <code>self</code> is not
+dropped.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.reset" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#282">source</a><h4 class="code-header">fn <a href="#tymethod.reset" class="fn">reset</a>(&amp;mut self)</h4></section></summary><div class="docblock"><p>Reset this heap.</p>
+<p>Calling this method unassociates this heap with the store that it has
+been associated with, making it available to be associated with a new
+heap.</p>
+<p>This should refill free lists, reset bump pointers, and etc… as if
+nothing were allocated in this heap (because nothing is allocated in
+this heap anymore).</p>
+<p>This should retain any allocated memory from the global allocator and
+any virtual memory mappings.</p>
+<p>This method is only used with the pooling allocator.</p>
+</div></details></div><h2 id="provided-methods" class="section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="method.drop_gc_ref" class="method"><a class="src rightside" href="../src/wasmtime_runtime/gc/gc_runtime.rs.html#131-134">source</a><h4 class="code-header">fn <a href="#method.drop_gc_ref" class="fn">drop_gc_ref</a>(
+    &amp;mut self,
+    host_data_table: &amp;mut <a class="struct" href="struct.ExternRefHostDataTable.html" title="struct wasmtime_runtime::ExternRefHostDataTable">ExternRefHostDataTable</a>,
+    gc_ref: <a class="struct" href="struct.VMGcRef.html" title="struct wasmtime_runtime::VMGcRef">VMGcRef</a>
+)</h4></section></summary><div class="docblock"><p>Write barrier called whenever the runtime is nulling out a GC reference.</p>
+<p>Default implemented in terms of the <code>write_gc_ref</code> barrier.</p>
+<p>If an <code>externref</code> is reclaimed, then its associated entry in the
+<code>host_data_table</code> should be removed.</p>
+<p>Callers should pass a valid <code>VMGcRef</code> that belongs to the given
+heap. Failure to do so is memory safe, but may result in general
+failures such as panics or incorrect results.</p>
+<p>The given <code>gc_ref</code> should not be used again.</p>
+</div></details></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"></div><script src="../trait.impl/wasmtime_runtime/gc/gc_runtime/trait.GcHeap.js" async></script></section></div></main></body></html>
